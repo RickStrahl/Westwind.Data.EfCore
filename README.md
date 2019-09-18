@@ -328,7 +328,7 @@ You can use the AutoValidate property instead which causes the validation automa
 var customerBus = new busCustomer()
 {
     // Validates on Save automatically
-    AutoValidate = true
+    Options.AutoValidate = true
 };
            
 var custExisting = customerBus.Load(1);
@@ -345,6 +345,26 @@ if (!customerBus.Save());
    Console.WriteLine(customerBus.ErrorMessage);
 else
    Console.WriteLine("Saved");
+```
+
+### Error Handling
+By default business object methods capture errors and set an internal error message/exception object that you can check upon return of the various CRUD methods. Many methods return true or false or null for failure when entities should be returned, along with an `ErrorMessage` and `ErrorException`. 
+
+The idea is that for business operations you typically want to get a definite response on success or failurenot wrap every individual call into unhandled exception block to get a result status. 
+
+However, if you'd rather have save errors throw exceptions than return error results, you can set the `ThrowExceptions` switch:
+
+```cs
+public class busCustomer : EfCodeFirstBusinessBase<Customer, WebStoreContext>
+{
+    // ctor
+    public busCustomer()
+    {
+        Options.ThrowExceptions = true;  // false by default
+    }
+    
+    ...
+}
 ```
 
 ### Sample Business Object

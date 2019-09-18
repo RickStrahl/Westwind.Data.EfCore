@@ -677,6 +677,9 @@ namespace Westwind.Data.EfCore
         /// <summary>
         /// Deletes an entity from the main entity set
         /// based on a key value.
+        ///
+        /// By default doesn't execute the SQL command but just
+        /// updates the context unless `saveChanges` is set to true.
         /// </summary>
         /// <param name="id">Id of the key to delete</param>
         /// <param name="saveChanges">if true changes are saved to disk. Otherwise entity is removed from context only</param>
@@ -720,6 +723,9 @@ namespace Westwind.Data.EfCore
         /// This method allows specifying an entity in a dbSet other
         /// then the main one as long as it's specified by the dbSet
         /// parameter.
+        ///
+        /// By default doesn't execute the SQL command but just
+        /// updates the context unless `saveChanges` is set to true.
         /// </summary>
         /// <param name="entity">The entity to delete</param>        
         /// Allows specifying the DbSet to which the entity passed belongs.
