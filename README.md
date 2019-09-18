@@ -29,22 +29,6 @@ More Info:
 * [Get it on NuGet](http://nuget.org/packages/Westwind.Data.EfCore/)
 * [Class Reference (not available yet)]()
 
-## Number 2
-asdklajsdlk jasdlkajs dklasjdl kasjdlkajsdlkjadlkjasd
-
-### Number 3
-asdklajsdlk jasdlkajs dklasjdl kasjdlkajsdlkjadlkjasd
-
-#### Number 4
-asdklajsdlk jasdlkajs dklasjdl kasjdlkajsdlkjadlkjasd
-
-##### Number 5
-asdklajsdlk jasdlkajs dklasjdl kasjdlkajsdlkjadlkjasd
-
-
-###### Number 6
-asdklajsdlk jasdlkajs dklasjdl kasjdlkajsdlkjadlkjasd
-
 
 ### Business Objects?
 The idea of this class is to provide an easy to use container for logical business objects that can provide business services to your application and at the same time provide a slight abstraction on top of the Entity Framework features to make it easier to deal with typical CRUD operations. The class encapsulates a DbContext that is available anywhere inside of the class and also used internally inside of the built-in CRUD methods.
@@ -78,7 +62,7 @@ The business object allows you to encapsulate your business logic and data acces
 ##### Simplified CRUD Operations
 The external interface of the business object provides core CRUD operations that 
 are similar to common EF operations but provide easier operation, like automatic
-context attachment, ID based lookups and deletes and many other small conveniences. Use single line `Load()`, `Save()`, `NewEntity()`, `Delete()`, `Validate()` operations to simplify CRUD operations. Most of these are thin wrappers around standard EF behavior, but they can reduce code significantly and keep Entity Framework semantics out of application code. You still retain full access to the underlying DbContext, but you should 
+context attachment, ID based lookups and deletes and many other small conveniences. Use single line `Load()`, `Save()`, `Create()`, `Delete()`, `Validate()` operations to simplify CRUD operations. Most of these are thin wrappers around standard EF behavior, but they can reduce code significantly and keep Entity Framework semantics out of application code. You still retain full access to the underlying DbContext, so you can still use all of the functionality of the core EF feature set, but the helper methods make common operations simpler and handle errors.
 
 ##### Validation
 The business object also provides consolidated validation for EF CodeFirst Model validation as well as code based validation rules via implementation of an `OnValidate()` method in the business object. The validation routines include a `ValidationErrors` collection that provides both EF model based errors as well as errors added via code. When the `Save()` method is called both the EF model validation (ie. Model Attributes and Model Validators) as well as code based validation that allows you to validate across the entire model and not just a single entity.   This allows maximum flexibility when creating dealing with validation logic that requires complex operations or data lookups.
@@ -87,21 +71,17 @@ The business object also provides consolidated validation for EF CodeFirst Model
 The internal interface provides many before/after hooks for data operations and internal
 overrides for validation logic that make it very easy to create consistent business logic. You can inject check and update code when loading and saving data.
 
-##### Optional extended DbContext Object
-Optionally you can also use a custom <code>EfCodeFirstContext</code> subclass of the DbContext object, which provides access to a low level Data Access Layer to stored procedure access or data operations that are too complex to manage through LINQ operations - it's an easy to use escape route to fall back to low level SQL when LINQ is too obtuse or for data operations (like stored proc calls) that are not easily handled through LINQ or Entity Framework natively.
-
 ##### DbContext Management
 Each business object instance gets its own DbContext instance that is internally managed and maintained. All operations in the same business object thus share the same DbContext. A context can be optionally assigned to another context by using custom constructors, but in general each business object has its own context to avoid potential cross talk and entity cache bloat.
 
 The associated DbContext is created when the business object is created and automatically released when the business object is released. The business object implements IDisposable() so the standard pattern of using `using()` statements applies.
 
-## Using Westwind.Data Business Objects
+## Using Westwind.Data.EfCore Business Objects
 
 ### Installation
 The easiest way to install the library is via NuGet:
 
     PM > Install-Package Westwind.EfCore
-
 
 Requirements:
 * .NET Core 2.0 or Later=
@@ -129,7 +109,7 @@ DbContext, so no parameters are required for the Context to find the connection 
 
 You can explicitly specify a connection string using custom constructors, or by changing the DbContext initialization code. More on that later.
 
-### Create your Business Object ###
+### Create your Business Object
 Create an instance of the business object and inherit it from EfCodeFirstBusinessBase:
 
 ```cs
@@ -137,11 +117,10 @@ public class CustomerBusiness : EntityFrameworkBusinessObject<TimeTrakkerContext
 { }
 ```    
 
-You specify a main entity type (Customer in this case) and the DbContext type (TimeTrakkerContext).  You now have a functioning business object for Customers.
+You specify a main **entity type** (Customer in this case) and the **DbContext type** (TimeTrakkerContext).  You now have a functioning business object for Customers.
 
 Note that you create many business objects for each **logical** business context
-or operation which wouldn't necessarily match each entity in the data model. For example,
-you would have an OrderBus business object, but likely not a LineItemBus business object since lineitems are logically associated with the Order and can be managed through an Order business object.
+or operation which wouldn't necessarily match each entity in the data model. For example, you would have an OrderBus business object, but likely not a LineItemBus business object since lineitems are logically associated with the Order and can be managed through an Order business object.
 
 ### Configuration
 Entity Framework Core is configured via dependency injection as part of the .NET Core startup process. This is really no different than using Entity Framework on its own:
@@ -150,17 +129,17 @@ In `Startup.ConfigureServices()`:
 
 ```cs
 services.AddDbContext<TimeTrakkerContext>(builder =>
-    {
-          var connStr = Configuration["ConnectionStrings:TimeTrakker"];
-          builder.UseSqlServer(connStr, opt =>
-          {
-              opt.EnableRetryOnFailure();
-              opt.CommandTimeout(15);
-          });               
-    });
+{
+      var connStr = Configuration["ConnectionStrings:TimeTrakker"];
+      builder.UseSqlServer(connStr, opt =>
+      {
+          opt.EnableRetryOnFailure();
+          opt.CommandTimeout(15);
+      });               
+});
 ```
 
-Additionally you probably also want to add your business objects to the Dependency Injection pipeline so you can get this Context injected in your application.
+Additionally you probably also want to add your business objects to the Dependency Injection pipeline so you can get the business objects injected in your application.
 
 Also, in `Startup.ConfigureServices()`:
 
@@ -171,8 +150,6 @@ services.AddTransient<TimeEntryBusiness>();
 services.AddTransient<CustomerBusiness>();
 services.AddTransient<LookupBusiness>();
 ```
-
-
 
 ### Using the Business Object
 Without adding any other functionality the business object is now functional and can run basic CRUD operations.
@@ -191,6 +168,12 @@ public class AccountController : BaseApiController
     {
         CustomerBus = customerBus;
         Configuration = config;
+    }
+    
+    
+    public Customer Get(int id) {
+        var user = CustomerBus.Load(id);
+        return user;
     }
 }        
 ```
