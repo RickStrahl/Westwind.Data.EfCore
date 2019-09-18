@@ -425,38 +425,19 @@ public class busCustomer : EfCodeFirstBusinessBase<Customer, WebStoreContext>
 } 
 ```
 
-### Custom DbContext
-This libary also provides an optional DbContext extension that provides access to a simplified raw Data Access Layer for direct SQL commands. The interface is based on [Westwind.Utilities.DataAccess](http://west-wind.com/westwindtoolkit/docs/_3ou0v2jum.htm) which provides the DAL implementation that is part of the Westwind.Utilities support library. This can be used on any DbContext instance to provide DAL features.
+## License
+The Westwind.Data.EfCore library is licensed under:
 
-#### Set up a custom Context
-To use this functionality simply create your context by inheriting from `Westwind.Data.EfCodeFirstContext`:
+* **[MIT license](http://opensource.org/licenses/MIT)**
 
-```cs
-public class WebStoreContext : EfCodeFirstContext  // instead of DbContext
-{ 
-    public DbSet<Customer> Customers { get; set; }
-    public DbSet<Order> Orders { get; set; }
-    public DbSet<LineItem> LineItems { get; set; }        
-}
-```
+All source code is **&copy; West Wind Technologies**, regardless of changes made to them. Any source code modifications must leave the original copyright code headers intact if present.
 
-Once you do this your Context instance now has a `.Db` property that you can access to run queries.
+There's no charge to use, integrate or modify the code for this project. You are free to use it in personal, commercial, government and any other type of application and you are free to modify the code for use in your own projects.
 
-Inside of a business object method you can then do something like this:
+### Give back
+If you find this library useful, consider making a small donation:
 
-```cs 
-var time = new DateTime(2000, 1, 1);
-var custs = Context.Db
-		.Query<Customer>("select * from Customers where entered > @0",time);
-
-var maxId = (int) Context.Db
-			.ExecuteScalar("select Max(id) from Customers")
-
-var count = Context.Db.ExecuteNonQuery("delete for password = ''")
-```
-
-These examples are not very useful as they are easily achievable with LINQ. Custom data access can be useful for commands that require complex SQL statements that might be simpler to execute as SQL strings rather than LINQ commands. LINQ can be a bear.
-
-DbContext does provide the Database property but it's limited to SqlQuery() and ExecuteSqlCommand(). If you need additional functionality the Db instance provides more control and options to return and execute Db commands directly in a richer way. 
-
-This is to say if you don't need this extended functionality and can work within what EF provides natively, you don't need this functionality. Add only as needed.
+<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=BA3NHHFHTMXD8" 
+    title="Find this library useful? Consider making a small donation." alt="Make Donation" style="text-decoration: none;">
+	<img src="https://weblog.west-wind.com/images/donation.png" />
+</a>
