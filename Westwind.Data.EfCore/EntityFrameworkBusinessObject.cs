@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Westwind.Utilities;
 using Westwind.Utilities.Data;
 
@@ -22,34 +21,9 @@ namespace Westwind.Data.EfCore
         public EntityFrameworkBusinessObject(TContext context)
         {
             Context = context;            
+            DatabaseSettings = new BusinessObjectDatabaseSettings<TEntity>(Context);
+            
         }
-
-        /// <summary>
-        /// Optional value for the connection string
-        /// </summary>
-        public string ConnectionString
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_connectionString) && Context != null)
-                {
-                    var conn = Context.Database.GetDbConnection();
-                    _connectionString = conn?.ConnectionString;                    
-                }
-
-                return _connectionString;
-            }
-            set { _connectionString = value; }
-        }
-        private string _connectionString;
-
-
-        /// <summary>
-        /// Instance of the DbContext. Must be passed or 
-        /// injected.
-        /// </summary>
-        public TContext Context { get; set; }
-
 
         /// <summary>
         /// Entity instance set by Load and Create and
@@ -58,34 +32,10 @@ namespace Westwind.Data.EfCore
         public TEntity Entity { get; set; }
 
         /// <summary>
-        /// Internally re-usable DbSet instance.
+        /// Instance of the DbContext. Must be passed or 
+        /// injected.
         /// </summary>
-        protected DbSet<TEntity> DbSet
-        {
-            get
-            {
-                if (_dbSet == null)
-                    _dbSet = Context.Set<TEntity>();
-                return _dbSet;
-            }
-        }
-        private DbSet<TEntity> _dbSet;
-
-
-        /// <summary>
-        /// Creates a new instance of the context
-        /// </summary>
-        /// <param name="connectionString"></param>
-        /// <returns></returns>
-        public static TContext GetContext(string connectionString)
-        {
-            var options = new DbContextOptionsBuilder<TContext>()
-                .UseSqlServer(connectionString)
-                .Options;
-
-            var ctx = Activator.CreateInstance(typeof(TContext), new object[] { options}) as TContext;
-            return ctx;
-        }
+        public TContext Context { get; set; }
 
         
         /// <summary>
@@ -97,13 +47,27 @@ namespace Westwind.Data.EfCore
             get
             {
                 if (_db == null)
-                    _db = new SqlDataAccess(ConnectionString);
+                    _db = new SqlDataAccess(DatabaseSettings.ConnectionString);
 
                 return _db;
             }
             set { _db = value; }
         }
         private SqlDataAccess _db;
+
+
+        /// <summary>
+        /// Database related settings like ConnectionString, Entity Table name
+        /// and an instance of the activated instance of the DbSet.
+        /// </summary>
+        public BusinessObjectDatabaseSettings<TEntity> DatabaseSettings { get; }
+
+
+        /// <summary>
+        /// Configuration options for the business object
+        /// </summary>
+        public BusinessObjectOptions Options { get; } = new BusinessObjectOptions();       
+
 
         /// <summary>
         /// A collection that can be used to hold errors or
@@ -120,7 +84,7 @@ namespace Westwind.Data.EfCore
         public ValidationErrorCollection ValidationErrors
         {
             get
-            {
+            {                
                 if (_validationErrors == null)
                     _validationErrors = new ValidationErrorCollection();
                 return _validationErrors;
@@ -128,18 +92,7 @@ namespace Westwind.Data.EfCore
         }
         ValidationErrorCollection _validationErrors;
 
-        /// <summary>
-        /// Determines whether the Validate method is automatically called
-        /// in the Save() operation
-        /// </summary>
-        public bool AutoValidate { get; set; }
-
-        /// <summary>
-        /// Determines whether Save operations throw 
-        /// exceptions or return errors as messages
-        /// </summary>
-        public bool ThrowExceptions { get; set; }
-
+        
         /// <summary>
         /// Error Message of the last exception
         /// </summary>
@@ -166,8 +119,22 @@ namespace Westwind.Data.EfCore
         /// </summary>
         public Exception ErrorException { get; set; }
 
-        #region CRUD operations
 
+
+        /// <summary>
+        /// Creates a new instance of the context
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <returns></returns>
+        public static TContext GetContext(string connectionString)
+        {
+            var options = new DbContextOptionsBuilder<TContext>()
+                .UseSqlServer(connectionString)
+                .Options;
+
+            var ctx = Activator.CreateInstance(typeof(TContext), new object[] { options }) as TContext;
+            return ctx;
+        }
 
         #region Create and Attach
         /// <summary>
@@ -218,30 +185,6 @@ namespace Westwind.Data.EfCore
         }
 
 
-        ///// <summary>
-        ///// Attaches an untracked entity to an entity set and marks it as modified.
-        ///// Note: child elements need to be manually added.
-        ///// </summary>
-        ///// <param name="entity"></param>
-        ///// <param name="entitySet"></param>
-        ///// <param name="markAsModified"></param>
-        ///// <param name="addNew"></param>
-        ///// <returns></returns>
-        //public object Attach(object entity, bool addNew = false, EntityState entityState = EntityState.Modified)
-        //{
-        //    var dbSet = Context.Set(entity.GetType());
-
-        //    if (addNew)
-        //        dbSet.Add(entity);
-        //    else
-        //    {
-        //        dbSet.Attach(entity);
-        //        GetEntityEntry(entity).State = entityState;
-        //    }
-
-        //    return entity;
-        //}
-
         /// <summary>
         /// Attaches an untracked to the internal context and 
         /// marks it as modified optionally
@@ -252,10 +195,10 @@ namespace Westwind.Data.EfCore
         public TEntity Attach(TEntity entity, bool addNew = false)
         {
             if (addNew)
-                DbSet.Add(entity);
+                DatabaseSettings.DbSet.Add(entity);
             else
             {
-                var entry = DbSet.Attach(entity);
+                var entry = DatabaseSettings.DbSet.Attach(entity);
                 entry.State = EntityState.Modified;
             }
 
@@ -300,7 +243,7 @@ namespace Westwind.Data.EfCore
             object match = null;
             try
             {
-                match = DbSet.Find(id);
+                match = DatabaseSettings.DbSet.Find(id);
                 if (match == null)
                 {
                     Entity = null;
@@ -366,7 +309,7 @@ namespace Westwind.Data.EfCore
 
             try
             {                
-                Entity = await DbSet.FirstOrDefaultAsync(whereClauseLambda);                               
+                Entity = await DatabaseSettings.DbSet.FirstOrDefaultAsync(whereClauseLambda);                               
             }
             catch (InvalidOperationException)
             {
@@ -421,7 +364,7 @@ namespace Westwind.Data.EfCore
             object match = null;
             try
             {
-                match = DbSet.Find(id);
+                match = DatabaseSettings.DbSet.Find(id);
                 if (match == null)
                 {
                     Entity = null;
@@ -485,7 +428,7 @@ namespace Westwind.Data.EfCore
 
             try
             {
-                Entity = DbSet.FirstOrDefault(whereClauseLambda);
+                Entity = DatabaseSettings.DbSet.FirstOrDefault(whereClauseLambda);
             }
             catch (InvalidOperationException)
             {
@@ -507,7 +450,7 @@ namespace Westwind.Data.EfCore
 
 
 
-
+        #region Saving and Deleting
         /// <summary>
         /// Saves changes to the repo
         /// </summary>
@@ -532,7 +475,7 @@ namespace Westwind.Data.EfCore
                 if (!OnBeforeSave(entity))
                     return false;
 
-                if (AutoValidate && !Validate(entity))
+                if (Options.AutoValidate && !Validate(entity))
                     return false;
 
                 var entry = Context.Entry(entity);
@@ -546,7 +489,7 @@ namespace Westwind.Data.EfCore
                     {
                         object id = Context.GetEntityKey(entity).FirstOrDefault();
                         if (id != null)
-                            match = DbSet.Find(id);
+                            match = DatabaseSettings.DbSet.Find(id);
                     }
                     catch
                     {
@@ -568,6 +511,9 @@ namespace Westwind.Data.EfCore
             }
             catch (Exception ex)
             {
+                if (Options.ThrowExceptions)
+                    throw ex;
+
                 SetError(ex.GetBaseException());
                 return false;
             }
@@ -623,7 +569,7 @@ namespace Westwind.Data.EfCore
                 if (!OnBeforeSave(entity))
                     return false;
 
-                if (AutoValidate && !Validate(entity))
+                if (Options.AutoValidate && !Validate(entity))
                     return false;
 
                 var entry = Context.Entry(entity);
@@ -645,6 +591,9 @@ namespace Westwind.Data.EfCore
             }
             catch (Exception ex)
             {
+                if (Options.ThrowExceptions)
+                    throw ex;
+
                 SetError(ex.GetBaseException());
                 return false;
             }
@@ -659,11 +608,12 @@ namespace Westwind.Data.EfCore
 
 
         /// <summary>
-        /// Wrapper around the Context.SaveChanges that doesn't throw.
+        /// Thin Wrapper around the Context.SaveChanges that doesn't throw.
         /// Use this for multiple data operations that are not explicitly
-        /// saving single instances and bypassed validation.
+        /// saving single instances and bypass validation and pre/post
+        /// processing.
         ///
-        /// In most cases Save() is more adequate
+        /// In most cases Save() is more adequate.
         /// </summary>
         /// <remarks>
         /// For validation and pre/post-processing hooks use the Save method.
@@ -680,6 +630,9 @@ namespace Westwind.Data.EfCore
             }
             catch (Exception ex)
             {
+                if (Options.ThrowExceptions)
+                    throw ex;
+
                 SetError(ex.GetBaseException());
                 return -1;
             }
@@ -688,9 +641,10 @@ namespace Westwind.Data.EfCore
         }
 
         /// <summary>
-        /// Wrapper around the Context.SaveChanges that doesn't throw.
+        /// Thin Wrapper around the Context.SaveChanges that doesn't throw.
         /// Use this for multiple data operations that are not explicitly
-        /// saving single instances and bypassed validation.
+        /// saving single instances and bypass validation and pre/post
+        /// processing.
         ///
         /// In most cases SaveAsync() is more adequate
         /// </summary>
@@ -709,6 +663,9 @@ namespace Westwind.Data.EfCore
             }
             catch (Exception ex)
             {
+                if (Options.ThrowExceptions)
+                    throw ex;
+
                 SetError(ex.GetBaseException());
                 return -1;
             }
@@ -726,8 +683,35 @@ namespace Westwind.Data.EfCore
         /// <returns></returns>
         public virtual bool Delete(object id, bool saveChanges = false, bool useTransaction = false)
         {
-            TEntity entity = DbSet.Find(id);
+            TEntity entity = DatabaseSettings.DbSet.Find(id);
             return Delete(entity, saveChanges: saveChanges, useTransaction: useTransaction);
+        }
+
+        /// <summary>
+        /// This is a raw delete operation that uses a raw SQL command
+        /// to delete an object directly bypassing the EF DbContext.
+        /// </summary>
+        /// <remarks>
+        /// Bypasses DbContext.
+        /// 
+        /// Returns true even if no records were deleted as it it means
+        /// that the records are in fact not existing any longer.
+        /// False and errors occur only if the SQL command execution fails.
+        /// </remarks>
+        /// <param name="id"></param>
+        public virtual bool DeleteDirect(object id)
+        {               
+            string sql = $"delete from [{DatabaseSettings.TableName}] where Id=@0";
+
+            var result = Db.ExecuteNonQuery(sql, id);
+            if (result > -1)           
+                return true;
+            
+            if (Db.ErrorException != null && Options.ThrowExceptions)
+                throw Db.ErrorException;                
+            
+            SetError(Db.ErrorMessage);
+            return false;
         }
 
         /// <summary>
@@ -751,8 +735,7 @@ namespace Westwind.Data.EfCore
         /// Defaults to false as to improve performance.
         /// </param>
         public virtual bool Delete(TEntity entity, bool saveChanges = true, bool useTransaction = false)
-        {
-            
+        {            
             if (entity == null)
                 return true;            
 
@@ -764,7 +747,8 @@ namespace Westwind.Data.EfCore
         
 
         /// <summary>
-        /// Actual delete operation that removes an entity
+        /// Actual delete operation that removes an entity but that
+        /// can be overridden for custom behavior if necessary.
         /// </summary>
         protected virtual bool DeleteInternal(TEntity entity, bool saveChanges = false, bool useTransaction = false)
         {
@@ -789,7 +773,7 @@ namespace Westwind.Data.EfCore
                 SetError(ex, true);
                 return false;
             }
-
+            
             return true;
         }
         #endregion
@@ -806,6 +790,16 @@ namespace Westwind.Data.EfCore
         /// <param name="entity"></param>
         /// <returns></returns>
         public bool? IsNewEntity(TEntity entity)
+        {
+            var entry = Context.Entry(entity);
+            if (entry == null || entry.State == EntityState.Detached)
+                return null;
+
+            return entry.State == EntityState.Added;
+        }
+
+        public bool? IsNewEntity<T>(T entity)
+            where  T :  class
         {
             var entry = Context.Entry(entity);
             if (entry == null || entry.State == EntityState.Detached)
@@ -833,7 +827,26 @@ namespace Westwind.Data.EfCore
                 SetError(ValidationErrors.ToString());
 
             return isValid;
-        }        
+        }
+
+        /// <summary>
+        /// Override this method to handle entity validation. Add any validation
+        /// errors to the ValidationErrors collection to indicate that validation
+        /// should fail.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        protected virtual bool OnValidate(TEntity entity)
+        {
+            // *** typical use case
+            // if (validationRuleFailed)
+            //    ValidationErrors.Add("Error Message","object id");
+            // return ValidationErrors.Count < 1;  // true - validate succeeds
+
+            return ValidationErrors.Count < 1;
+        }
+
         #endregion
 
 
@@ -901,24 +914,6 @@ namespace Westwind.Data.EfCore
             return true;
         }
 
-
-        /// <summary>
-        /// Override this method to handle entity validation. Add any validation
-        /// errors to the ValidationErrors collection to indicate that validation
-        /// should fail.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entity"></param>
-        /// <returns></returns>
-        protected virtual bool OnValidate(TEntity entity)
-        {
-            // *** typical use case
-            // if (validationRuleFailed)
-            //    ValidationErrors.Add("Error Message","object id");
-            // return ValidationErrors.Count < 1;  // true - validate succeeds
-
-            return ValidationErrors.Count < 1;
-        }
         #endregion
 
         #region Error Handling
@@ -935,7 +930,7 @@ namespace Westwind.Data.EfCore
                 return;
             }
 
-            ErrorException = new Exception(Message);
+            ErrorException = new ApplicationException(Message);
 
             //if (Options.ThrowExceptions)
             //    throw ErrorException;
@@ -958,8 +953,8 @@ namespace Westwind.Data.EfCore
             }
 
             ErrorMessage = ErrorException.Message;
-            //if (ex != null && Options.ThrowExceptions)
-            //    throw ex;
+            if (ex != null && Options.ThrowExceptions)
+                throw ex;
         }
 
         /// <summary>
@@ -971,6 +966,101 @@ namespace Westwind.Data.EfCore
             ErrorMessage = null;
         }
         #endregion
+
+    }
+
+    public class BusinessObjectOptions
+    {
+        /// <summary>
+        /// Determines whether the Validate method is automatically called
+        /// in the Save() operation
+        /// </summary>
+        public bool AutoValidate { get; set; }
+
+        /// <summary>
+        /// Determines whether Save operations throw 
+        /// exceptions or return errors as messages
+        /// </summary>
+        public bool ThrowExceptions { get; set; }
+
+    }
+
+    public class BusinessObjectDatabaseSettings<TEntity>
+        where TEntity : class, new()
+    {
+        private readonly DbContext Context;
+
+
+        public BusinessObjectDatabaseSettings(DbContext context)
+        {
+            Context = context;            
+        }
+
+        /// <summary>
+        /// Optional value for the connection string
+        /// </summary>
+        public string ConnectionString
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_connectionString) && Context != null)
+                {
+                    var conn = Context.Database.GetDbConnection();
+                    _connectionString = conn?.ConnectionString;
+                }
+
+                return _connectionString;
+            }
+            set { _connectionString = value; }
+        }
+        private string _connectionString;
+
+        private static string _tableName;
+
+        /// <summary>
+        /// Internally re-usable DbSet instance.
+        /// </summary>
+        public DbSet<TEntity> DbSet
+        {
+            get
+            {
+                if (_dbSet == null)
+                    _dbSet = Context.Set<TEntity>();
+                return _dbSet;
+            }
+        }
+        private DbSet<TEntity> _dbSet;
+
+
+
+        /// <summary>
+        /// Table name for the TEntity which can be used for raw
+        /// SQL queries.
+        ///
+        /// Name includes table plus schema prefix if the schema
+        /// was provided in the model.
+        /// 
+        /// Example: Users or dbo.Users
+        /// </summary>
+        public string TableName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_tableName))
+                {
+                    var mapping = Context.Model.FindEntityType(typeof(TEntity)).Relational();
+                    var schema = mapping.Schema;
+                    if (schema != null)
+                        schema += ".";
+                    else
+                        schema = "";
+
+                    _tableName = schema + mapping.TableName;
+                }
+
+                return _tableName;
+            }
+        }
 
     }
 }
