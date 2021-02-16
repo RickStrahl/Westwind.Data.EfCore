@@ -21,8 +21,7 @@ namespace Westwind.Data.EfCore
         public EntityFrameworkBusinessObject(TContext context)
         {
             Context = context;            
-            DatabaseSettings = new BusinessObjectDatabaseSettings<TEntity>(Context);
-            
+            DatabaseSettings = new BusinessObjectDatabaseSettings<TEntity>(Context);            
         }
 
         /// <summary>
@@ -309,7 +308,51 @@ namespace Westwind.Data.EfCore
 
             try
             {                
-                Entity = await DatabaseSettings.DbSet.FirstOrDefaultAsync(whereClauseLambda);                               
+                Entity = await DatabaseSettings.DbSet.FirstOrDefaultAsync(whereClauseLambda);
+                if (Entity == null)
+                {
+                    SetError("Unable to load entity");
+                    return null;
+                }
+                OnAfterLoaded(Entity);
+            }
+            catch (InvalidOperationException)
+            {
+                Entity = null;
+
+                // Handles errors where an invalid Id was passed, but SQL is valid                
+                SetError("Couldn't load entity...");                
+            }
+            catch (Exception ex)
+            {
+                Entity = null;
+                // handles Sql errors                                
+                SetError(ex);
+            }
+
+            return Entity;
+        }
+
+        /// <summary>
+        /// Loads an entity by an expression
+        /// </summary>
+        /// <param name="whereClauseLambda"></param>
+        /// <returns></returns>
+        protected virtual TEntity LoadBase(Expression<Func<TEntity, bool>> whereClauseLambda)
+        {
+            SetError();
+
+            try
+            {                
+                Entity = DatabaseSettings.DbSet.FirstOrDefault(whereClauseLambda);          
+                
+                if (Entity == null)
+                {
+                    SetError("Unable to load entity");
+                    return null;
+                }
+
+                OnAfterLoaded(Entity);
             }
             catch (InvalidOperationException)
             {
@@ -1054,14 +1097,16 @@ namespace Westwind.Data.EfCore
             {
                 if (string.IsNullOrEmpty(_tableName))
                 {
-                    var mapping = Context.Model.FindEntityType(typeof(TEntity)).Relational();
-                    var schema = mapping.Schema;
+                    var entityType = Context.Model.FindEntityType(typeof(TEntity));
+                    var tableName = entityType.GetDefaultTableName();
+                    var schema = entityType.GetDefaultSchema();
+                    
                     if (schema != null)
                         schema += ".";
                     else
                         schema = "";
 
-                    _tableName = schema + mapping.TableName;
+                    _tableName = schema + tableName;
                 }
 
                 return _tableName;
