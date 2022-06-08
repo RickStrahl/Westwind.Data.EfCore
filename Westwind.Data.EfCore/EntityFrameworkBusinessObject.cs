@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace Westwind.Data.EfCore
     /// </summary>
     /// <typeparam name="TContext"></typeparam>
     /// <typeparam name="TEntity"></typeparam>    
-    public class EntityFrameworkBusinessObject<TContext, TEntity>
+    public class EntityFrameworkBusinessObject<TContext, TEntity>  : IDisposable
         where TContext : DbContext
         where TEntity : class, new()
     {      
@@ -204,6 +205,11 @@ namespace Westwind.Data.EfCore
             Entity = entity;
 
             return Entity;
+        }
+
+        public void GetEntityState(TEntity entity)
+        {
+
         }
         #endregion
 
@@ -734,33 +740,6 @@ namespace Westwind.Data.EfCore
         }
 
         /// <summary>
-        /// This is a raw delete operation that uses a raw SQL command
-        /// to delete an object directly bypassing the EF DbContext.
-        /// </summary>
-        /// <remarks>
-        /// Bypasses DbContext.
-        /// 
-        /// Returns true even if no records were deleted as it it means
-        /// that the records are in fact not existing any longer.
-        /// False and errors occur only if the SQL command execution fails.
-        /// </remarks>
-        /// <param name="id"></param>
-        public virtual bool DeleteDirect(object id)
-        {               
-            string sql = $"delete from [{DatabaseSettings.TableName}] where Id=@0";
-
-            var result = Db.ExecuteNonQuery(sql, id);
-            if (result > -1)           
-                return true;
-            
-            if (Db.ErrorException != null && Options.ThrowExceptions)
-                throw Db.ErrorException;                
-            
-            SetError(Db.ErrorMessage);
-            return false;
-        }
-
-        /// <summary>
         /// removes an individual entity instance.
         /// 
         /// This method allows specifying an entity in a dbSet other
@@ -793,7 +772,64 @@ namespace Westwind.Data.EfCore
           
             return true;
         }
-        
+
+
+        /// <summary>
+        /// This is a raw delete operation that uses a raw SQL command
+        /// to delete an object directly bypassing the EF DbContext.
+        /// </summary>
+        /// <remarks>
+        /// Bypasses DbContext.
+        /// 
+        /// Returns true even if no records were deleted as it it means
+        /// that the records are in fact not existing any longer.
+        /// False and errors occur only if the SQL command execution fails.
+        /// </remarks>
+        /// <param name="id"></param>
+        public virtual bool DeleteDirect(object id)
+        {               
+            string sql = $"delete from [{DatabaseSettings.TableName}] where Id=@0";
+
+            var result = Db.ExecuteNonQuery(sql, id);
+            if (result > -1)           
+                return true;
+            
+            if (Db.ErrorException != null && Options.ThrowExceptions)
+                throw Db.ErrorException;                
+            
+            SetError(Db.ErrorMessage);
+            return false;
+        }
+
+
+        /// <summary>
+        /// Raw delete operation with a filter string that is used as
+        /// a raw `WHERE` clause in a direct SQL statement.
+        /// </summary>
+        /// <param name="sqlFilter">SQL Where clause as a string</param>
+        /// <returns></returns>
+        public virtual int DeleteWhereDirect(string sqlFilter = null)
+        {
+            string sql = "delete from [{Database.TableName}])";
+            if (!string.IsNullOrEmpty(sqlFilter))
+            {
+
+                sqlFilter = sqlFilter.Replace("'", "''");
+                sql = "delete from [{Database.TableName}]) where '{sqlFilter}'";
+            }
+
+            int result = Db.ExecuteNonQuery(sql);
+
+            if (result > -1)
+                return result;
+
+            if (Db.ErrorException != null && Options.ThrowExceptions)
+                throw Db.ErrorException;
+
+            SetError(Db.ErrorMessage);
+
+            return result;
+        }
 
         /// <summary>
         /// Actual delete operation that removes an entity but that
@@ -1014,7 +1050,14 @@ namespace Westwind.Data.EfCore
             ErrorException = null;
             ErrorMessage = null;
         }
+
+        public void Dispose()
+        {
+            Context?.Dispose();
+            Context = null;
+        }
         #endregion
+
 
     }
 
