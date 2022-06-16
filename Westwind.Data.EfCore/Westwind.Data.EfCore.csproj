@@ -1,44 +1,46 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net60</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>4.0</Version>
-    <Authors>Rick Strahl</Authors>
-    <Company>West Wind Technologies</Company>
-    <Product>West Wind Web Toolkit</Product>
-    <Title>Westwind.Data.EfCore</Title>
-    <Description>Lightweight Business wrapper around Entity Framework Core Data Access.</Description>
-    <Copyright>(c) West Wind Technologies, 2017-2022</Copyright>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net60</TargetFramework>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Version>4.0.1</Version>
+		<Authors>Rick Strahl</Authors>
+		<Company>West Wind Technologies</Company>
+		<Product>West Wind Web Toolkit</Product>
+		<Title>Westwind.Data.EfCore</Title>
+		<Description>Lightweight Business wrapper around Entity Framework Core Data Access.</Description>
+		<Copyright>(c) West Wind Technologies, 2017-2022</Copyright>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <DebugType>embedded</DebugType>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageOutputPath>./nupkg</PackageOutputPath>
-	  <PackageTags>Westwind AspNetCore Data EfCore</PackageTags>
-	  <PackageIcon>icon.png</PackageIcon>
+	<PropertyGroup>
+		<DebugType>embedded</DebugType>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageOutputPath>./nupkg</PackageOutputPath>
+		<PackageTags>Westwind AspNetCore Data EfCore</PackageTags>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageLicense>LICENSE.MD</PackageLicense>
 
-    <PackageProjectUrl>https://github.com/RickStrahl/Westwind.Data.EfCore</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/RickStrahl/Westwind.Data.EfCore#License</PackageLicenseUrl>
-    <RepositoryUrl>https://github.com/RickStrahl/Westwind.Data.EfCore</RepositoryUrl>
-    <RepositoryType>Github</RepositoryType>
-  </PropertyGroup>
+		<PackageProjectUrl>https://github.com/RickStrahl/Westwind.Data.EfCore</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/RickStrahl/Westwind.Data.EfCore</RepositoryUrl>
+		<RepositoryType>Github</RepositoryType>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>embedded</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DebugType>embedded</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.5" />
-    <PackageReference Include="Westwind.Utilities" Version="3.1.10" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.6" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0.6" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.6" />
+		<PackageReference Include="Westwind.Utilities" Version="3.1.10" />
+	</ItemGroup>
 
 
-  <ItemGroup>
-    <None Include="icon.png" Pack="true" PackagePath="" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="icon.png" Pack="true" PackagePath="" />
+		<None Include="LICENSE.md" Pack="true" PackagePath="" />
+	</ItemGroup>
 
 </Project>

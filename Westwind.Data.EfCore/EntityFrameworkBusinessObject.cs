@@ -121,21 +121,6 @@ namespace Westwind.Data.EfCore
 
 
 
-        /// <summary>
-        /// Creates a new instance of the context
-        /// </summary>
-        /// <param name="connectionString"></param>
-        /// <returns></returns>
-        public static TContext GetContext(string connectionString)
-        {
-            var options = new DbContextOptionsBuilder<TContext>()
-                .UseSqlServer(connectionString)
-                .Options;
-
-            var ctx = Activator.CreateInstance(typeof(TContext), new object[] { options }) as TContext;
-            return ctx;
-        }
-
         #region Create and Attach
         /// <summary>
         /// Creates a new instance of the entity type 
@@ -561,7 +546,7 @@ namespace Westwind.Data.EfCore
             catch (Exception ex)
             {
                 if (Options.ThrowExceptions)
-                    throw ex;
+                    throw;
 
                 SetError(ex.GetBaseException());
                 return false;
@@ -607,12 +592,16 @@ namespace Westwind.Data.EfCore
         /// 
         /// If entity is not passed on SaveChanges is called
         /// </summary>
+        /// <param name="entity">Enity that is saved and updated.</param>
         /// <remarks>
         /// For raw saving without pre-/post processing use SaveChanges()
         /// </remarks>
         /// <returns></returns>
         public virtual bool Save(TEntity entity = null)
         {
+            if (entity == null)
+                entity = Entity;
+
             if (entity != null)
             {
                 if (!OnBeforeSave(entity))
@@ -641,7 +630,7 @@ namespace Westwind.Data.EfCore
             catch (Exception ex)
             {
                 if (Options.ThrowExceptions)
-                    throw ex;
+                    throw;
 
                 SetError(ex.GetBaseException());
                 return false;
@@ -680,7 +669,7 @@ namespace Westwind.Data.EfCore
             catch (Exception ex)
             {
                 if (Options.ThrowExceptions)
-                    throw ex;
+                    throw;
 
                 SetError(ex.GetBaseException());
                 return -1;
@@ -695,7 +684,8 @@ namespace Westwind.Data.EfCore
         /// saving single instances and bypass validation and pre/post
         /// processing.
         ///
-        /// In most cases SaveAsync() is more adequate
+        /// In most cases SaveAsync() is more adequate as it handles
+        /// individual entity CRUD and fixups.
         /// </summary>
         /// <remarks>
         /// For validation and pre/post-processing hooks use the Save method.
@@ -713,7 +703,7 @@ namespace Westwind.Data.EfCore
             catch (Exception ex)
             {
                 if (Options.ThrowExceptions)
-                    throw ex;
+                    throw;
 
                 SetError(ex.GetBaseException());
                 return -1;
