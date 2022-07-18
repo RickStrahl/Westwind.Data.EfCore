@@ -180,10 +180,10 @@ namespace Westwind.Data.EfCore
         public TEntity Attach(TEntity entity, bool addNew = false)
         {
             if (addNew)
-                DatabaseSettings.DbSet.Add(entity);
+                Context.Add<TEntity>(entity);
             else
             {
-                var entry = DatabaseSettings.DbSet.Attach(entity);
+                var entry = Context.Attach<TEntity>(entity);
                 entry.State = EntityState.Modified;
             }
 
@@ -233,7 +233,7 @@ namespace Westwind.Data.EfCore
             object match = null;
             try
             {
-                match = DatabaseSettings.DbSet.Find(id);
+                match = Context.Find<TEntity>(id);
                 if (match == null)
                 {
                     Entity = null;
@@ -398,7 +398,7 @@ namespace Westwind.Data.EfCore
             object match = null;
             try
             {
-                match = DatabaseSettings.DbSet.Find(id);
+                match = Context.Find<TEntity>(id);
                 if (match == null)
                 {
                     Entity = null;
@@ -1102,19 +1102,9 @@ namespace Westwind.Data.EfCore
         /// <summary>
         /// Internally re-usable DbSet instance.
         /// </summary>
-        public DbSet<TEntity> DbSet
-        {
-            get
-            {
-                if (_dbSet == null)
-                    _dbSet = Context.Set<TEntity>();
-                return _dbSet;
-            }
-        }
-        private DbSet<TEntity> _dbSet;
+        public DbSet<TEntity> DbSet => Context.Set<TEntity>();
 
-
-
+        
         /// <summary>
         /// Table name for the TEntity which can be used for raw
         /// SQL queries.
