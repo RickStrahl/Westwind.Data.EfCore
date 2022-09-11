@@ -21,14 +21,9 @@ This library is a light weight business object framework around Entity Framework
 	 * SQL String queries to read-only Entity mapping
      * Full range of DAL operations
      
-> #### BlockQuote
-> This is a nice blockquote.
-     
-     
 More Info:
 * [Get it on NuGet](http://nuget.org/packages/Westwind.Data.EfCore/)
 * [Class Reference (not available yet)]()
-
 
 ### Business Objects?
 The idea of this class is to provide an easy to use container for logical business objects that can provide business services to your application and at the same time provide a slight abstraction on top of the Entity Framework features to make it easier to deal with typical CRUD operations. The class encapsulates a DbContext that is available anywhere inside of the class and also used internally inside of the built-in CRUD methods.
@@ -38,7 +33,7 @@ Although this library provides an small abstraction on top of Entity Framework C
 In addition this class provides for a Save operation that automatically captures error information for validation errors, both for EF validations as well as any more complex coded validations you can implement using the built in Validation methods.
 
 ### How it Works
-Using this library you implement business objects that are associated with an Entity Framework Code First Model and a top level EF entity object. You can inherit from `EntityFrameworkBusinessObject<TContext,TEntityser>` and the resulting class then acts as a business object that can provide a logical container for your business logic code. 
+Using this library you implement business objects that are associated with an Entity Framework Code First Model and a top level EF entity object. You can inherit from `EntityFrameworkBusinessObject<TContext,TEntity>` and the resulting class then acts as a business object that can provide a logical container for your business logic code. 
 
 To create a business object:
 ```cs
@@ -62,7 +57,7 @@ The business object allows you to encapsulate your business logic and data acces
 ##### Simplified CRUD Operations
 The external interface of the business object provides core CRUD operations that 
 are similar to common EF operations but provide easier operation, like automatic
-context attachment, ID based lookups and deletes and many other small conveniences. Use single line `Load()`, `Save()`, `Create()`, `Delete()`, `Validate()` operations to simplify CRUD operations. Most of these are thin wrappers around standard EF behavior, but they can reduce code significantly and keep Entity Framework semantics out of application code. You still retain full access to the underlying DbContext, so you can still use all of the functionality of the core EF feature set, but the helper methods make common operations simpler and handle errors.
+context attachment, ID based lookups and deletes and many other small conveniences. Use single line `Load()`, `Save()`, `Create()`, `Delete()`, `Validate()` operations (as well as `async` versions thereof)  to simplify CRUD operations. Most of these are thin wrappers around standard EF behavior, but they can reduce code significantly and keep Entity Framework semantics out of application code. You still retain full access to the underlying DbContext, so you can still use all of the functionality of the core EF feature set, but the helper methods make common operations simpler and handle errors.
 
 ##### Validation
 The business object also provides consolidated validation for EF CodeFirst Model validation as well as code based validation rules via implementation of an `OnValidate()` method in the business object. The validation routines include a `ValidationErrors` collection that provides both EF model based errors as well as errors added via code. When the `Save()` method is called both the EF model validation (ie. Model Attributes and Model Validators) as well as code based validation that allows you to validate across the entire model and not just a single entity.   This allows maximum flexibility when creating dealing with validation logic that requires complex operations or data lookups.
@@ -84,9 +79,9 @@ The easiest way to install the library is via NuGet:
     PM > Install-Package Westwind.EfCore
 
 Requirements:
-* .NET Core 2.0 or Later=
-* [EntityFramework Core 2.0+ (from NuGet)](https://www.nuget.org/packages/EntityFrameworkCore)
-
+* .NET Core 6.0 or Later
+* [EntityFramework Core 6.0+ (from NuGet)](https://www.nuget.org/packages/EntityFrameworkCore)
+* A specific EF Core data provider (ie. `EntityFrameworkCore.SqlServer`)
 
 ### Getting Started
 The West Wind Data library works by providing a base business object class that you inherit from. The base class wraps the DbContext and a base entity type, but the base entity type is just a convenience for top level entity operations. From within the business object you have full access to the entire DbContext model. 
@@ -98,26 +93,20 @@ The business object components works off an existing Entity Framework Code First
 Model and Database, so before you create a business object you'll need to create the 
 EF model and context.
 
-Create a connection string entry in your .config file, ideally with the same name as the 
-DbContext, so no parameters are required for the Context to find the connection using the default constructor.
-
-```xml
-<add name="WebStoreContext" 
-     connectionString="server=.;database=OrdersSample;integrated security=true;MultipleActiveResultSets=true;" 
-     providerName="System.Data.SqlClient" />
-```
-
 You can explicitly specify a connection string using custom constructors, or by changing the DbContext initialization code. More on that later.
 
 ### Create your Business Object
 Create an instance of the business object and inherit it from EfCodeFirstBusinessBase:
 
 ```cs
-public class CustomerBusiness : EntityFrameworkBusinessObject<TimeTrakkerContext, TimeEntry>
+public class CustomerBusiness : EntityFrameworkBusinessObject<WebStoreContext, Customer>
 { }
 ```    
 
-You specify a main **entity type** (Customer in this case) and the **DbContext type** (TimeTrakkerContext).  You now have a functioning business object for Customers.
+You specify a main **entity type** (a POCO `Customer` in this case) and the **DbContext type** (TimeTrakkerContext).  You now have a functioning business object for `Customers`. 
+
+> #### The Entity type is a **Logical** Mapping
+> The `TEntity` Type is used for instance level operations as well as for validation. Remember that this is not necessarily a 1-1 mapping between the business object to an entity. It could be that a business object maps to a set of related entities, such as an Invoice which has child line items and a required customer. 
 
 Note that you create many business objects for each **logical** business context
 or operation which wouldn't necessarily match each entity in the data model. For example, you would have an OrderBus business object, but likely not a LineItemBus business object since lineitems are logically associated with the Order and can be managed through an Order business object.
@@ -130,7 +119,7 @@ In `Startup.ConfigureServices()`:
 ```cs
 services.AddDbContext<TimeTrakkerContext>(builder =>
 {
-      var connStr = Configuration["ConnectionStrings:TimeTrakker"];
+      var connStr = Configuration["ConnectionStrings:WebStore"];
       builder.UseSqlServer(connStr, opt =>
       {
           opt.EnableRetryOnFailure();
@@ -213,6 +202,11 @@ if (!customerBus.Save())
         
 customerBus.Delete(id);
 ```
+
+### Creating Instances without Dependency Injection
+ASP.NET core code assumes that the instances are created with Dependency injection. While that's the preferred way to create instances.
+
+
 
 
 ### Adding to the Business Object

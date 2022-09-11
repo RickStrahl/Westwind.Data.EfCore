@@ -3,12 +3,12 @@
 	<PropertyGroup>
 		<TargetFramework>net60</TargetFramework>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>4.0.1</Version>
+		<Version>4.0.4</Version>
 		<Authors>Rick Strahl</Authors>
 		<Company>West Wind Technologies</Company>
 		<Product>West Wind Web Toolkit</Product>
 		<Title>Westwind.Data.EfCore</Title>
-		<Description>Lightweight Business wrapper around Entity Framework Core Data Access.</Description>
+		<Description>Lightweight Business Object wrapper around Entity Framework Core Data Access.</Description>
 		<Copyright>(c) West Wind Technologies, 2017-2022</Copyright>
 	</PropertyGroup>
 
@@ -31,10 +31,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.6" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0.6" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.6" />
-		<PackageReference Include="Westwind.Utilities" Version="3.1.10" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.8" />
+		<PackageReference Include="Westwind.Utilities" Version="3.1.14" />
 	</ItemGroup>
 
 
