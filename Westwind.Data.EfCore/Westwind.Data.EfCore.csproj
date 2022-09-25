@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net60</TargetFramework>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>4.0.4</Version>
+		<Version>4.0.5</Version>
 		<Authors>Rick Strahl</Authors>
 		<Company>West Wind Technologies</Company>
 		<Product>West Wind Web Toolkit</Product>

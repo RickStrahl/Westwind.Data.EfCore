@@ -92,6 +92,10 @@ namespace Westwind.Data.EfCore
         }
         ValidationErrorCollection _validationErrors;
 
+        /// <summary>
+        /// Determines whether there are any validation errors
+        /// </summary>
+        public bool HasValidationErrors => ValidationErrors.Count > 0;
         
         /// <summary>
         /// Error Message of the last exception
@@ -893,9 +897,10 @@ namespace Westwind.Data.EfCore
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public virtual bool Validate(TEntity entity)
+        public virtual bool Validate(TEntity entity, bool dontClearValidationErrors = false)
         {
-            ValidationErrors.Clear();
+            if (!dontClearValidationErrors)
+                ValidationErrors.Clear();
 
             bool isValid = OnValidate(entity);
             if (!isValid)
