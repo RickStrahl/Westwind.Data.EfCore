@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net60</TargetFramework>
+		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>4.0.5</Version>
+		<Version>5.0.4</Version>
 		<Authors>Rick Strahl</Authors>
 		<Company>West Wind Technologies</Company>
 		<Product>West Wind Web Toolkit</Product>
 		<Title>Westwind.Data.EfCore</Title>
 		<Description>Lightweight Business Object wrapper around Entity Framework Core Data Access.</Description>
-		<Copyright>(c) West Wind Technologies, 2017-2022</Copyright>
+		<Copyright>(c) West Wind Technologies, 2017-2023</Copyright>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -18,7 +18,7 @@
 		<PackageOutputPath>./nupkg</PackageOutputPath>
 		<PackageTags>Westwind AspNetCore Data EfCore</PackageTags>
 		<PackageIcon>icon.png</PackageIcon>
-		<PackageLicense>LICENSE.MD</PackageLicense>
+		<PackageLicense>LICENSE.md</PackageLicense>
 
 		<PackageProjectUrl>https://github.com/RickStrahl/Westwind.Data.EfCore</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/RickStrahl/Westwind.Data.EfCore</RepositoryUrl>
@@ -31,10 +31,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.8" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0.8" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.8" />
-		<PackageReference Include="Westwind.Utilities" Version="3.1.14" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="7.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.5" />
+		<PackageReference Include="Westwind.Utilities" Version="4.0.2" />
+		<PackageReference Include="Westwind.Utilities.Data" Version="4.0.0" />
 	</ItemGroup>
 
 
@@ -42,5 +43,7 @@
 		<None Include="icon.png" Pack="true" PackagePath="" />
 		<None Include="LICENSE.md" Pack="true" PackagePath="" />
 	</ItemGroup>
+
+
 
 </Project>
