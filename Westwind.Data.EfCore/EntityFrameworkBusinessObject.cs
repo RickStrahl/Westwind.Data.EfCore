@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -11,11 +10,20 @@ namespace Westwind.Data.EfCore
 {
 
     /// <summary>
-    /// A base repository that provides basic CRUD operations.
+    /// A business object that acts as a thin layer over Entity Framework
+    /// CRUD operations.
+    ///
+    /// Provides for:
+    ///
+    /// * Simplified CRUD operations
+    /// * Error Handling
+    /// * Validation
+    /// 
     /// </summary>
     /// <typeparam name="TContext"></typeparam>
     /// <typeparam name="TEntity"></typeparam>    
-    public class EntityFrameworkBusinessObject<TContext, TEntity>  : IDisposable
+    public class EntityFrameworkBusinessObject<TContext, TEntity>  
+        : IDisposable
         where TContext : DbContext
         where TEntity : class, new()
     {      
@@ -1069,77 +1077,6 @@ namespace Westwind.Data.EfCore
         /// exceptions or return errors as messages
         /// </summary>
         public bool ThrowExceptions { get; set; }
-
-    }
-
-    public class BusinessObjectDatabaseSettings<TEntity>
-        where TEntity : class, new()
-    {
-        private readonly DbContext Context;
-
-
-        public BusinessObjectDatabaseSettings(DbContext context)
-        {
-            Context = context;            
-        }
-
-        /// <summary>
-        /// Optional value for the connection string
-        /// </summary>
-        public string ConnectionString
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_connectionString) && Context != null)
-                {
-                    var conn = Context.Database.GetDbConnection();
-                    _connectionString = conn?.ConnectionString;
-                }
-
-                return _connectionString;
-            }
-            set { _connectionString = value; }
-        }
-        private string _connectionString;
-
-        private static string _tableName;
-
-        /// <summary>
-        /// Internally re-usable DbSet instance.
-        /// </summary>
-        public DbSet<TEntity> DbSet => Context.Set<TEntity>();
-
-        
-        /// <summary>
-        /// Table name for the TEntity which can be used for raw
-        /// SQL queries.
-        ///
-        /// Name includes table plus schema prefix if the schema
-        /// was provided in the model.
-        /// 
-        /// Example: Users or dbo.Users
-        /// </summary>
-        public string TableName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_tableName))
-                {
-                    var entityType = Context.Model.FindEntityType(typeof(TEntity));
-                    var tableName = entityType.GetDefaultTableName();
-                    var schema = entityType.GetDefaultSchema();
-                    
-                    if (schema != null)
-                        schema += ".";
-                    else
-                        schema = "";
-
-                    _tableName = schema + tableName;
-                }
-
-                return _tableName;
-            }
-        }
 
     }
 }
