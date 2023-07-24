@@ -459,8 +459,6 @@ namespace Westwind.Data.EfCore
                 SetError(ex);
             }
 
-            OnAfterLoaded(Entity);
-
             return entity;
         }
         /// <summary>
