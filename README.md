@@ -1,6 +1,9 @@
 # West Wind Data EF Core
 #### Light Weight Business Object Library for Entity Framework Code First
 
+ [![](https://img.shields.io/nuget/v/Westwind.Data.EfCore.svg)](https://www.nuget.org/packages/Westwind.Data.EfCore) 
+ [![](https://img.shields.io/nuget/dt/Westwind.Data.EfCore.svg)](https://www.nuget.org/packages/Westwind.Data.EfCore)
+
 This library is a light weight business object framework around Entity Framework Code First. It provides a simple way to encapsulate your business logic in one place, with the following features:
 
 * Provides a convenient logical container for business logic
