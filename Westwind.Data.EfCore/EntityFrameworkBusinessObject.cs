@@ -336,43 +336,6 @@ namespace Westwind.Data.EfCore
             return Entity;
         }
 
-        /// <summary>
-        /// Loads an entity by an expression
-        /// </summary>
-        /// <param name="whereClauseLambda"></param>
-        /// <returns></returns>
-        protected virtual TEntity LoadBase(Expression<Func<TEntity, bool>> whereClauseLambda)
-        {
-            SetError();
-
-            try
-            {                
-                Entity = DatabaseSettings.DbSet.FirstOrDefault(whereClauseLambda);          
-                
-                if (Entity == null)
-                {
-                    SetError("Unable to load entity");
-                    return null;
-                }
-
-                OnAfterLoaded(Entity);
-            }
-            catch (InvalidOperationException)
-            {
-                Entity = null;
-
-                // Handles errors where an invalid Id was passed, but SQL is valid                
-                SetError("Couldn't load entity...");                
-            }
-            catch (Exception ex)
-            {
-                Entity = null;
-                // handles Sql errors                                
-                SetError(ex);
-            }
-
-            return Entity;
-        }
         #endregion
 
         #region load Sync
@@ -461,25 +424,35 @@ namespace Westwind.Data.EfCore
 
             return entity;
         }
+        
+        
         /// <summary>
         /// Loads an entity by an expression
         /// </summary>
         /// <param name="whereClauseLambda"></param>
         /// <returns></returns>
-        protected virtual TEntity LoadBaseSync(Expression<Func<TEntity, bool>> whereClauseLambda)
+        protected virtual TEntity LoadBase(Expression<Func<TEntity, bool>> whereClauseLambda)
         {
             SetError();
 
             try
-            {
-                Entity = DatabaseSettings.DbSet.FirstOrDefault(whereClauseLambda);
+            {                
+                Entity = DatabaseSettings.DbSet.FirstOrDefault(whereClauseLambda);          
+                
+                if (Entity == null)
+                {
+                    SetError("Unable to load entity");
+                    return null;
+                }
+
+                OnAfterLoaded(Entity);
             }
             catch (InvalidOperationException)
             {
                 Entity = null;
 
                 // Handles errors where an invalid Id was passed, but SQL is valid                
-                SetError("Couldn't load entity...");
+                SetError("Couldn't load entity...");                
             }
             catch (Exception ex)
             {
