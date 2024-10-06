@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>6.0.3</Version>
+		<Version>6.0.4</Version>
 		<Authors>Rick Strahl</Authors>
 		<Company>West Wind Technologies</Company>
 		<Product>West Wind Web Toolkit</Product>
@@ -28,8 +28,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Westwind.Utilities" Version="5.0.7.2" />
-		<PackageReference Include="Westwind.Utilities.Data" Version="5.0.7" />
+		<PackageReference Include="Westwind.Utilities" Version="5.0.8" />
+		<PackageReference Include="Westwind.Utilities.Data" Version="5.0.8" />
 		
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.7" />
