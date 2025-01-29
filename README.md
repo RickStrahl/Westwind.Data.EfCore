@@ -11,7 +11,7 @@ This library is a light weight business object framework around Entity Framework
 * Wrapped CRUD operations with DbContext lifetime management  
   (Load,Save,Delete,NewEntity,Validate operations)  
 * Simplifies saving and updating of data consistently
-* Model and code based validatation support
+* Model and code based validation support
 * Pre and Post hooks for CRUD operations
 * Error and data conflict management and reporting
 * Consistent error model and trapping
