@@ -77,6 +77,14 @@ namespace Westwind.Data.EfCore
 
         /// <summary>
         /// An optional logger instance that you can pass into the business object
+        /// 
+        /// This instance is NOT automatically injected. When you need ILogger you
+        /// can add it to your constructor and assign but make sure that 
+        /// Microsoft.Extensions.ILogger is available in DI. This is the reason 
+        /// for not automatically injecting as this requires a permanent reference 
+        /// of the logger.
+        /// 
+        /// Defaults to a null logger so logger calls will not fail.
         /// </summary>
         public ILogger Logger { get; set; } = NullLogger.Instance;
 
