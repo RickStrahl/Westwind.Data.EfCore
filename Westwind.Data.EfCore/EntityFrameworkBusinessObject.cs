@@ -1,8 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Westwind.Utilities;
 using Westwind.Utilities.Data;
 
@@ -26,12 +29,13 @@ namespace Westwind.Data.EfCore
         : IDisposable
         where TContext : DbContext
         where TEntity : class, new()
-    {      
+    {
+
         public EntityFrameworkBusinessObject(TContext context)
         {
-            Context = context;            
+            Context = context;
             DatabaseSettings = new BusinessObjectDatabaseSettings<TEntity>(Context);            
-        }
+        }       
 
         /// <summary>
         /// Entity instance set by Load and Create and
@@ -69,6 +73,12 @@ namespace Westwind.Data.EfCore
         /// and an instance of the activated instance of the DbSet.
         /// </summary>
         public BusinessObjectDatabaseSettings<TEntity> DatabaseSettings { get; }
+
+
+        /// <summary>
+        /// An optional logger instance that you can pass into the business object
+        /// </summary>
+        public ILogger Logger { get; set; } = NullLogger.Instance;
 
 
         /// <summary>
