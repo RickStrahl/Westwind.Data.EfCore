@@ -3,13 +3,13 @@
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>9.0</Version>
+		<Version>9.0.8</Version>
 		<Authors>Rick Strahl</Authors>
 		<Company>West Wind Technologies</Company>
 		<Product>West Wind Web Toolkit</Product>
 		<Title>Westwind.Data.EfCore</Title>
 		<Description>Lightweight Business Object wrapper around Entity Framework Core Data Access.</Description>
-		<Copyright>(c) West Wind Technologies, 2017-2024</Copyright>
+		<Copyright>(c) West Wind Technologies, 2017-2025</Copyright>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -28,12 +28,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Westwind.Utilities" Version="5.0.11" />
-		<PackageReference Include="Westwind.Utilities.Data" Version="5.0.10" />
+		<PackageReference Include="Westwind.Utilities" Version="5.1.15.1" />
+		<PackageReference Include="Westwind.Utilities.Data" Version="5.1.15" />
 		
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="9.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.8" />
 	</ItemGroup>
 	
 
