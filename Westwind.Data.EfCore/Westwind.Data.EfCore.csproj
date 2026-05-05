@@ -28,12 +28,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Westwind.Utilities" Version="5.3.0" />
-		<PackageReference Include="Westwind.Utilities.Data" Version="5.3.0" />
+		<PackageReference Include="Westwind.Utilities" Version="5.3.1" />
+		<PackageReference Include="Westwind.Utilities.Data" Version="5.3.1" />
 		
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="10.0.5" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="10.0.7" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.7" />
 	</ItemGroup>
 	
 
